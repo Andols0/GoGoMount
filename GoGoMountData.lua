@@ -208,6 +208,8 @@ function GoGo_GetMountDB()
 		[186257] = {[7] = true, [8] = true, [500] = true, ["DefaultInstance"] = true, [10002]=138},  -- Aspect of the Cheeta
 		[210053] = {[7] = true, [500] = true, [1000]=true, [10002]=200}, -- Druid Mount Form
 		[310143] = {[7] = true, [8] = true, [500] = true, [1000] = true, ["DefaultInstance"] = true, [10002]=150}, -- Night Fae SoulShape
+
+		[460013] = { [300] = true, [332] = true, [10002]=200}, -- G-99 Breackneck D.R.I.V.E fordon
 		
 		
 		-- MOUNTS FROM ITEMS

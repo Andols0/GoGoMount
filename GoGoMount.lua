@@ -714,6 +714,10 @@ function GoGo_ChooseMount()
 			GoGo_DebugAddLine("GoGo_ChooseMount: Eliminated mounts that require skill 225 or 300 to use; " .. (table.getn(GoGo_Variables.FilteredMounts) or 0) .. " mounts left.")
 		end --if
 	end --if
+	--
+	if not GoGo_Variables.ZoneExclude.DRIVE and GoGo_InBook(1215279) then
+		mounts = GoGo_FilterMountsIn(GoGo_Variables.FilteredMounts, 332)
+	end
 
 	-- Select ground mounts
 	if (table.getn(mounts) == 0) and GoGo_Variables.CanRide then
@@ -1007,6 +1011,11 @@ function GoGo_BuildMountList()
 		end --if
 	end --if
 	
+	if GoGo_Variables.Player.MapID == 2346 then
+		local name = C_Spell.GetSpellInfo(1215279).name
+		local spellID = C_Spell.GetSpellInfo(name).spellID
+		table.insert(GoGo_MountList, spellID)
+	end
 	return GoGo_MountList
 end  --function
 
