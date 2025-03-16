@@ -92,6 +92,8 @@ function GoGo_GetMountDB()
 	GoGo_Variables.GenericMountDB = {
 	
 		[230] = {[38] = true, [330]=true, [400]=true, [402]=true, [405]=true, [701]=true, [10001]=67, [10002]=160, [10004]=67}, -- Generic Ground Mount
+		
+		[231] = {[15] = true, [39] = true, [330]=true, [400]=true, [10001]=67, [10002]=100, [10004]=67}, --Generic Sea turtle (groundmount)
 		-- No default for type 231
 		-- No default for type 232
 		[241] = {[38] = true, [201] = true, [330]=true, [402]=true, [10002]=160}, -- Qiraji Battle Tanks
@@ -101,10 +103,23 @@ function GoGo_GetMountDB()
 		[254] = {[36] = true, [53] = true, [404] = true, [10001]=108, [10004]=108}, -- Generic Water Mount
 		[284] = {[39] = true, [400]=true, [402]=true, [405]=true, [701]=true, [10001]=67, [10002]=160, [10004]=67}, -- Chauffeured mounts
 		-- No default for type 398
-		[402] = {[406]=true} -- Dragonriding mounts
+		[402] = {[406]=true}, -- Dragonriding mounts
 		-- Missing type 412
+		[424] = {[406] = true, [10001]=67, [10002]=160, [10003]=250, [10004]=67 }, --Skyriding enabled mounts
+
+		[436] = {[15] = true, [39] = true, [402]=true, [404]=true, [10001]=108, [10002]=100, [10003]=310},  -- Wondrous Wavewhisker
 	
+		[408] = {}
 	}
+
+	--unknown, assume they are copies from normal flying
+	GoGo_Variables.GenericMountDB[437] = GoGo_Variables.GenericMountDB[248] --Waveshredders
+	GoGo_Variables.GenericMountDB[445] = GoGo_Variables.GenericMountDB[248] --Voyagin Wilderling
+
+	--Ottuk, copy from Wondrous Wavewhisker
+	GoGo_Variables.GenericMountDB[412] = GoGo_Variables.GenericMountDB[436] --Ottus
+	GoGo_Variables.GenericMountDB[407] = GoGo_Variables.GenericMountDB[436] --Ottus
+
 
 	GoGo_Variables.MountDB = {
 	
@@ -143,7 +158,6 @@ function GoGo_GetMountDB()
 		
 		
 		-- TYPE 231
-		[30174] = {[15] = true, [39] = true, [10001]=67, [10002]=100, [10004]=67},  -- Riding Turtle
 		[64731] = {[15] = true, [39] = true, [402]=true, [404]=true, [10001]=108, [10002]=100, [10004]=108},  -- Sea Turtle
 		
 		
@@ -197,7 +211,7 @@ function GoGo_GetMountDB()
 		
 		-- SHAPE FORMS AND SPEED SPELLS
 		[768] = {[7] = true, [8] = true, [1000] = true, [500] = true, ["DefaultInstance"] = true, [10002]=130},  -- Druid Cat Form
-		[783] = {[7] = true, [500] = true, [1000]=true, [10002]=200}, -- Druid Travel Form
+		[783] = {[7] = true, [500] = true, [1000]=true, [10002]=200, [10003] = 250}, -- Druid Travel Form
 		[1066] = {[7] = true, [53] = true, [500]=true, [1000]=true, [10001]=101, [10004]=101, ["DefaultInstance"] = true},  -- Druid Aqua form
 		[2645] = {[7] = true, [8] = true, [500] = true, [1000] = true, ["DefaultInstance"] = true, [10002]=130}, -- Shaman Ghost Wolf Form
 		[33943] = {[7] = true, [9] = true, [300] = true, [301] = true, [403] = true, [9998] = true, ["FlightOnly"] = true, [10003]=250},  -- Druid Flight Form
@@ -297,19 +311,19 @@ function GoGo_GetMountDB()
 		--  [33184] = {[38] = true, [9] = true, [4] = true, [999] = true},  -- Swift Magic Broom  --  itemid
 	   
 	}
-	
+
 	-- Fill generic mount types from journal
 	for _,mountID in ipairs(C_MountJournal.GetMountIDs()) do
-		spellID = select(2, C_MountJournal.GetMountInfoByID(mountID))
+		local name, spellID, _, _, _, _, _, _, _, shouldHideOnChar = C_MountJournal.GetMountInfoByID(mountID)
 		mountTypeID  = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
-		if GoGo_Variables.MountDB[spellID] == nil and mountTypeID ~= 242 then
+		if GoGo_Variables.MountDB[spellID] == nil and mountTypeID ~= 242 and not shouldHideOnChar then
 			if GoGo_Variables.Debug >= 10 then
 				GoGo_DebugAddLine("GoGo_GetMountDB: Adding mount " .. spellID .. " with standard type " .. mountTypeID )
 			end --if
 			if  GoGo_Variables.GenericMountDB[mountTypeID] == nil then
 				GoGo_Msg(UnknownMountType)
-				if GoGo_Variables.Debug >= 6 then
-					GoGo_DebugAddLine("GoGo_GetMountDB: Missing type " .. mountTypeID )
+				if GoGo_Variables.Debug >= 6 or true  then
+					GoGo_DebugAddLine("GoGo_GetMountDB: Missing type " .. mountTypeID .. " from mount ".. mountID .. " with name " .. name .. " and spell id " .. spellID)
 				end --if
 			else
 				GoGo_Variables.MountDB[spellID] = GoGo_Variables.GenericMountDB[mountTypeID]
