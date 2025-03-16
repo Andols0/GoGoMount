@@ -41,10 +41,10 @@ function GoGo_OnEvent(self, event, ...)
 		end --if
 		if not GoGo_Prefs.version then
 			GoGo_Settings_Default()
-		elseif GoGo_Prefs.version ~= GetAddOnMetadata("GoGoMount", "Version") then
+		elseif GoGo_Prefs.version ~= C_AddOns.GetAddOnMetadata("GoGoMount", "Version") then
 			GoGo_Settings_SetUpdates()
 		end --if
-		GoGo_Variables.VerMajor, GoGo_Variables.VerMinor, GoGo_Variables.VerBuild = strsplit(".", GetAddOnMetadata("GoGoMount", "Version"))
+		GoGo_Variables.VerMajor, GoGo_Variables.VerMinor, GoGo_Variables.VerBuild = strsplit(".", C_AddOns.GetAddOnMetadata("GoGoMount", "Version"))
 		GoGo_Variables.VerMajor, GoGo_Variables.VerMinor, GoGo_Variables.VerBuild = tonumber(GoGo_Variables.VerMajor), tonumber(GoGo_Variables.VerMinor), tonumber(GoGo_Variables.VerBuild)
 		_, GoGo_Variables.Player.Class = UnitClass("player")
 		_, GoGo_Variables.Player.Race = UnitRace("player")
@@ -82,7 +82,7 @@ function GoGo_OnEvent(self, event, ...)
 					GoGo_DebugAddLine("GoGo_OnEvent: Shaman entering combat.  Setting macro.")
 				end --if
 				GoGo_FillButton(button, GoGo_InBook(GOGO_SPELLS["SHAMAN"]))
-			elseif GoGo_Variables.Player.Covenant == GoGo_Variables.Localize.NightFae then
+			elseif GoGo_Variables.Player.Covenant == GoGo_Variables.Localize.NightFae and C_Spell.IsSpellUsable(GOGO_SPELLS["NIGHTFAE"]())then
 				if GoGo_Variables.Debug >= 10 then 
 					GoGo_DebugAddLine("GoGo_OnEvent: Night Fae entering combat.  Setting macro.")
 				end --if
@@ -101,8 +101,8 @@ function GoGo_OnEvent(self, event, ...)
 					GoGo_FillButton(button)
 				end --if
 			elseif GoGo_Variables.Player.ZoneID == 950 then  -- everyone else if in nagrand
-				local name = GetSpellInfo(161691)
-				_, _, _, _, _, _, spellID = GetSpellInfo(name)
+				local name = C_Spell.GetSpellInfo(161691).name
+				_, _, _, _, _, _, spellID = C_Spell.GetSpellInfo(name)
 				if spellID == 165803 or spellID == 164222 then
 					if GoGo_Variables.Player.Faction == "Alliance" then
 						GoGo_FillButton(button, GoGo_GetIDName(165803))
@@ -234,13 +234,13 @@ function GoGo_PreClick(button)
 			GoGo_DebugAddLine("GoGo_PreClick: Player is a druid, is shifted and not in combat.")
 		end --if
 		GoGo_Dismount(button)
---	elseif GoGo_Variables.Player.Class == "SHAMAN" and UnitBuff("player", GetSpellInfo(GoGo_Variables.Localize.GhostWolf)) then
-	elseif GoGo_Variables.Player.Class == "SHAMAN" and AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Variables.Localize.GhostWolf), "player") then
+--	elseif GoGo_Variables.Player.Class == "SHAMAN" and UnitBuff("player", Get1pellInfo(GoGo_Variables.Localize.GhostWolf)) then
+	elseif GoGo_Variables.Player.Class == "SHAMAN" and AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Variables.Localize.GhostWolf).name, "player") then
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_PreClick: Player is a shaman and is in wolf form.  Standing up.")
 		end --if
 		GoGo_Dismount(button)
-	elseif GoGo_Variables.Player.Covenant == GoGo_Variables.Localize.NightFae and AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Variables.Localize.SoulShape), "player") then
+	elseif GoGo_Variables.Player.Covenant == GoGo_Variables.Localize.NightFae and AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Variables.Localize.SoulShape).name, "player") then
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_PreClick: Player is in SoulShape form.  Standing up.")
 		end --if
@@ -385,6 +385,7 @@ function GoGo_ChooseMount()
 		GoGo_Variables.FilteredMounts = GoGo_RemoveUnusableMounts(GoGo_Variables.FilteredMounts)  -- remove mounts blizzard says we can't use
 	end --if
 
+
 	if ((GoGo_Variables.SelectPassengerMount) and table.getn(GoGo_Prefs.ExtraPassengerMounts) > 0) then
 		for GoGo_TempLoopCounter=1, table.getn(GoGo_Prefs.ExtraPassengerMounts) do
 			if GoGo_Variables.Debug >= 10 then
@@ -473,7 +474,7 @@ function GoGo_ChooseMount()
 
 --	if GoGo_Variables.ExpansionAccount == 3 then  -- only exists for 4.x with Cataclysm expansion
 --		if UnitBuff("player", GetSpellInfo(GoGo_Variables.Localize.SeaLegs)) then
-		if AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Variables.Localize.SeaLegs), "player") then
+		if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Variables.Localize.SeaLegs).name, "player") then
 			if GoGo_Variables.Debug >= 10 then
 				GoGo_DebugAddLine("GoGo_ChooseMount: Sea Legs buff found - not removing Vashj'ir mount.")
 			end --if
@@ -668,7 +669,7 @@ function GoGo_ChooseMount()
 	end
 	
 	-- Force Dragon riding mounts only
-	if (table.getn(mounts) == 0) and GoGo_Variables.ZoneExclude.DragonRiding then
+	if (#mounts == 0) and GoGo_Variables.ZoneExclude.DragonRiding and not(GoGo_Variables.SkipFlyingMount) then
 		mounts = GoGo_FilterMountsIn(GoGo_Variables.FilteredMounts, 406) or {}
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_ChooseMount: Forcing Dragon riding mounts.")
@@ -681,7 +682,7 @@ function GoGo_ChooseMount()
 		end --if
 		mounts = GoGo_GetBestAirMounts(GoGo_Variables.FilteredMounts)
 --	elseif (table.getn(mounts) == 0) and UnitBuff("player", GetSpellInfo(168796)) then
-	elseif (table.getn(mounts) == 0) and AuraUtil.FindAuraByName(GetSpellInfo(168796), "player") then
+	elseif (table.getn(mounts) == 0) and AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(168796).name, "player") then
 		-- Druids in Ashran with "Book of Flight Form" buff can fly in Ashran zones
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_ChooseMount: Didn't pass flight checks but we're a Druid with buff 168796 so we're attempting to select flight form to fly.")
@@ -863,8 +864,8 @@ function GoGo_Dismount(button)
 			end --if
 		end --if
 	elseif GoGo_Variables.Player.Class == "SHAMAN" then
---		if UnitBuff("player", GetSpellInfo(GoGo_Variables.Localize.GhostWolf)) and button then
-		if AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Variables.Localize.GhostWolf), "player") and button then
+--		if UnitBuff("player", C_Spell.GetSpellInfo(GoGo_Variables.Localize.GhostWolf)) and button then
+		if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Variables.Localize.GhostWolf).name, "player") and button then
 			if GoGo_Prefs.ShamanClickForm then
 				GoGo_FillButton(button, GoGo_GetMount())
 			else
@@ -876,7 +877,7 @@ function GoGo_Dismount(button)
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_Dismount: Getting out of Soulshape ")
 		end --if
-		if AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Variables.Localize.SoulShape), "player") and button then
+		if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Variables.Localize.SoulShape).name, "player") and button then
 			if GoGo_Prefs.NightFaeClickForm then
 				GoGo_FillButton(button, GoGo_GetMount())
 			else
@@ -907,7 +908,7 @@ function GoGo_BuildMountList()
 				if SpellID == 0 then
 				    GoGo_DebugAddLine("GoGo_BuildMountList: SpellID: " .. SpellID )
 				else
-					GoGo_DebugAddLine("GoGo_BuildMountList: SpellID: " .. SpellID .. "  isUsable: " .. tostring(isUsable) .. "  isFactionSpecific: " .. tostring(isFactionSpecific) .. "  faction: " .. tostring(faction) .. "  isCollected: " .. tostring(isCollected) .. "  IsUsableSpell(): " .. tostring(IsUsableSpell(SpellID)) .. "  IsSpellKnown(): " .. tostring(IsSpellKnown(SpellID)))
+					GoGo_DebugAddLine("GoGo_BuildMountList: SpellID: " .. SpellID .. "  isUsable: " .. tostring(isUsable) .. "  isFactionSpecific: " .. tostring(isFactionSpecific) .. "  faction: " .. tostring(faction) .. "  isCollected: " .. tostring(isCollected) .. "  IsUsableSpell(): " .. tostring(C_Spell.IsSpellUsable(SpellID)) .. "  IsSpellKnown(): " .. tostring(IsSpellKnown(SpellID)))
 				end --if
 			end --if
 
@@ -987,7 +988,7 @@ function GoGo_BuildMountList()
 				table.insert(GoGo_MountList, GoGo_SpellId)
 			end --if
 		elseif GoGo_Variables.MountItemIDs[MountItemID][51001] then  -- equipable items
-			if IsEquippedItem(MountItemID) then
+			if C_Item.IsEquippedItem(MountItemID) then
 				table.insert(GoGo_MountList, GoGo_SpellId)
 			elseif GoGo_InBags(MountItemID) then
 				table.insert(GoGo_MountList, GoGo_SpellId)
@@ -999,8 +1000,8 @@ function GoGo_BuildMountList()
 	GoGo_Variables.Player.MapID = C_Map.GetBestMapForUnit("player")
 	if GoGo_Variables.Player.MapID == 550 then
 		-- or 551, 552, 553 TODO	
-		local name = GetSpellInfo(161691)
-		_, _, _, _, _, _, spellID = GetSpellInfo(name)
+		local name = C_Spell.GetSpellInfo(161691).name
+		local spellID = C_Spell.GetSpellInfo(name).spellID
 		if spellID == 165803 or spellID == 164222 then
 			table.insert(GoGo_MountList, spellID)
 		end --if
@@ -1041,7 +1042,7 @@ function GoGo_RemoveUnusableMounts(MountList)  -- Remove mounts Blizzard says we
 					end --if
 				end --if
 			else  -- it's a mount spell or class shape form
-				if IsUsableSpell(GoGo_SpellID) then  -- don't use IsSpellKnown() - mounts in collection are not known... morons....
+				if C_Spell.IsSpellUsable(GoGo_SpellID) then  -- don't use IsSpellKnown() - mounts in collection are not known... morons....
 					table.insert(GoGo_NewTable, GoGo_SpellID)
 				end --if
 			end --if
@@ -1067,7 +1068,7 @@ function GoGo_InBags(item)
 					if GoGo_Variables.Debug >= 10 then 
 						GoGo_DebugAddLine("GoGo_InBags: Found item ID " .. item .. " in bag " .. (bag+1) .. ", at slot " .. slot .. " and added to known mount list.")
 					end --if
-					return GetItemInfo(link)
+					return C_Item.GetItemInfo(link)
 				end --if
 			end --if
 		end --for
@@ -1098,7 +1099,7 @@ function GoGo_InBook(spell)
 				slot = slot + 1
 			end --while
 		elseif type(spell) == "number" then
-			local spellname = GetSpellInfo(spell)
+			local spellname = C_Spell.GetSpellInfo(spell).name
 			if GoGo_Variables.Debug >= 10 then
 				GoGo_DebugAddLine("GoGo_InBook: Searching for spell ID " .. spell)
 			end --if
@@ -1157,28 +1158,28 @@ function GoGo_RemoveBuffs(GoGo_Buff)  -- adds lines to button macro to remove re
 	local spellid = 0
 	if GoGo_Buff then  -- specifying buff to remove
 		if GoGo_Variables.Debug >= 10 then
-			GoGo_DebugAddLine("GoGo_RemoveBuffs: Checking for " .. GoGo_Buff .. " (" .. GetSpellInfo(GoGo_Buff) .. ")")
+			GoGo_DebugAddLine("GoGo_RemoveBuffs: Checking for " .. GoGo_Buff .. " (" .. C_Spell.GetSpellInfo(GoGo_Buff).name .. ")")
 		end --if
---		if UnitBuff("player", GetSpellInfo(GoGo_Buff)) then
-		if AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Buff), "player") then
+--		if UnitBuff("player", C_Spell.GetSpellInfo(GoGo_Buff)) then
+		if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Buff).name, "player") then
 			if GoGo_Variables.Debug >= 10 then
-				GoGo_DebugAddLine("GoGo_RemoveBuffs: Found and removing buff " .. GoGo_Buff .. " (" .. GetSpellInfo(GoGo_Buff) .. ")")
+				GoGo_DebugAddLine("GoGo_RemoveBuffs: Found and removing buff " .. GoGo_Buff .. " (" .. C_Spell.GetSpellInfo(GoGo_Buff).name .. ")")
 			end --if
-			GoGo_Macro = GoGo_Macro .. "/cancelaura " .. GetSpellInfo(GoGo_Buff) .. " \n"
+			GoGo_Macro = GoGo_Macro .. "/cancelaura " .. C_Spell.GetSpellInfo(GoGo_Buff).name .. " \n"
 		end --if
 		return GoGo_Macro
 	end --if
 	
 	for spellid = 1, table.getn(GoGo_Variables.DebuffDB) do
 		if GoGo_Variables.Debug >= 10 then
-			GoGo_DebugAddLine("GoGo_RemoveBuffs: Checking for " .. GoGo_Variables.DebuffDB[spellid] .. " (" .. GetSpellInfo(GoGo_Variables.DebuffDB[spellid]) .. ")")
+			GoGo_DebugAddLine("GoGo_RemoveBuffs: Checking for " .. GoGo_Variables.DebuffDB[spellid] .. " (" .. C_Spell.GetSpellInfo(GoGo_Variables.DebuffDB[spellid]).name .. ")")
 		end --if
---		if UnitBuff("player", GetSpellInfo(GoGo_Variables.DebuffDB[spellid])) then
-		if AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Variables.DebuffDB[spellid]), "player") then
+--		if UnitBuff("player", C_Spell.GetSpellInfo(GoGo_Variables.DebuffDB[spellid])) then
+		if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Variables.DebuffDB[spellid]).name, "player") then
 			if GoGo_Variables.Debug >= 10 then
-				GoGo_DebugAddLine("GoGo_RemoveBuffs: Found and removing buff " .. GoGo_Variables.DebuffDB[spellid] .. " (" .. GetSpellInfo(GoGo_Variables.DebuffDB[spellid]) .. ")")
+				GoGo_DebugAddLine("GoGo_RemoveBuffs: Found and removing buff " .. GoGo_Variables.DebuffDB[spellid] .. " (" .. C_Spell.GetSpellInfo(GoGo_Variables.DebuffDB[spellid]).name .. ")")
 			end --if
-			GoGo_Macro = GoGo_Macro .. "/cancelaura " .. GetSpellInfo(GoGo_Variables.DebuffDB[spellid]) .. " \n"
+			GoGo_Macro = GoGo_Macro .. "/cancelaura " .. C_Spell.GetSpellInfo(GoGo_Variables.DebuffDB[spellid]).name .. " \n"
 		end --if
 	end --for
 	return GoGo_Macro
@@ -1506,31 +1507,31 @@ function GoGo_GetIDName(itemid)
 		table.insert(GoGo_TempMount, itemid)
 		if (table.getn(GoGo_FilterMountsIn(GoGo_TempMount, 50000)) == 1) then
 			if GoGo_Variables.Debug >= 10 then
-				GoGo_DebugAddLine("GoGo_GetIDName: GetItemID for " .. itemid .. " " .. GetItemInfo(GoGo_Variables.MountDB[itemid][50000]))
+				GoGo_DebugAddLine("GoGo_GetIDName: GetItemID for " .. itemid .. " " .. C_Item.GetItemInfo(GoGo_Variables.MountDB[itemid][50000]).itemName)
 			end --if
-			return GetItemInfo(GoGo_Variables.MountDB[itemid][50000]) or "Unknown Mount"
+			return C_Item.GetItemInfo(GoGo_Variables.MountDB[itemid][50000]).itemName or "Unknown Mount"
 		else
 			if GoGo_Variables.Debug >= 10 then
-				GoGo_DebugAddLine("GoGo_GetIDName: GetSpellID for " .. itemid .. " " .. (GetSpellInfo(itemid) or "Unknown Mount"))
+				GoGo_DebugAddLine("GoGo_GetIDName: GetSpellID for " .. itemid .. " " .. (C_Spell.GetSpellInfo(itemid).name or "Unknown Mount"))
 			end --if
-			return GetSpellInfo(itemid) or "Unknown Mount"
+			return C_Spell.GetSpellInfo(itemid).name or "Unknown Mount"
 		end --if
 	elseif type(itemid) == "table" then
 		for a=1, table.getn(itemid) do
 			local GoGo_TempTable = {}
 			table.insert(GoGo_TempTable, itemid[a])
 			if (table.getn(GoGo_FilterMountsIn(GoGo_TempTable, 50000)) == 1) then
---				tempname = GetItemInfo(tempname)
+--				tempname = C_Item.GetItemInfo(tempname)
 				if GoGo_Variables.Debug >= 10 then
-					GoGo_DebugAddLine("GoGo_GetIDName: GetItemID for " .. itemid[a] .. GetItemInfo(GoGo_Variables.MountDB[itemid[a]][50000]))
+					GoGo_DebugAddLine("GoGo_GetIDName: GetItemID for " .. itemid[a] .. C_Item.GetItemInfo(GoGo_Variables.MountDB[itemid[a]][50000]).itemName)
 				end --if
-				ItemName = ItemName .. (GetItemInfo(GoGo_Variables.MountDB[itemid[a]][50000]) or "Unknown Mount") .. ", "
+				ItemName = ItemName .. (C_Item.GetItemInfo(GoGo_Variables.MountDB[itemid[a]][50000]).itemName or "Unknown Mount") .. ", "
 			else
---				tempname = GetSpellInfo(tempname)
+--				tempname = C_Spell.GetSpellInfo(tempname)
 				if GoGo_Variables.Debug >= 10 then
-					GoGo_DebugAddLine("GoGo_GetIDName: GetSpellID for " .. itemid[a] .. GetSpellInfo(itemid[a]))
+					GoGo_DebugAddLine("GoGo_GetIDName: GetSpellID for " .. itemid[a] .. C_Spell.GetSpellInfo(itemid[a]).name)
 				end --if
-				ItemName = ItemName .. (GetSpellInfo(itemid[a]) or "Unknown Mount") .. ", "
+				ItemName = ItemName .. (C_Spell.GetSpellInfo(itemid[a]).name or "Unknown Mount") .. ", "
 			end --if
 			if GoGo_Variables.Debug >= 10 then
 				GoGo_DebugAddLine("GoGo_GetIDName: Itemname string is " .. ItemName)
@@ -1664,13 +1665,13 @@ function GoGo_GlyphActive(spellid)
 		local enabled, _, _, TempSpellID = GetGlyphSocketInfo(TempCount)
 		if enabled and TempSpellID == spellid then
 			if GoGo_Variables.Debug >= 10 then
-				GoGo_DebugAddLine("GoGo_GlyphActive: Found active glyph " .. spellid .. " (" .. GetSpellInfo(spellid) .. ")")
+				GoGo_DebugAddLine("GoGo_GlyphActive: Found active glyph " .. spellid .. " (" .. C_Spell.GetSpellInfo(spellid) .. ")")
 			end --if
 			return true
 		end --if
 	end --for
 	if GoGo_Variables.Debug >= 10 then
-		GoGo_DebugAddLine("GoGo_GlyphActive: Not found active glyph " .. spellid .. " (" .. GetSpellInfo(spellid) .. ")")
+		GoGo_DebugAddLine("GoGo_GlyphActive: Not found active glyph " .. spellid .. " (" .. C_Spell.GetSpellInfo(spellid) .. ")")
 	end --if
 
 	return false
@@ -1984,8 +1985,8 @@ function GoGo_UpdateMountData()
 	if not GoGo_Variables.ZoneExclude.ThousandNeedles then  -- we are in thousand needles - ground mounts swim faster with buff
 		local GoGo_TempMountDB = {}
 		local GoGo_TempLoopCounter
---		if UnitBuff("player", GetSpellInfo(75627)) and IsSwimming() then
-		if AuraUtil.FindAuraByName(GetSpellInfo(75627), "player") and IsSwimming() then
+--		if UnitBuff("player", C_Spell.GetSpellInfo(75627)) and IsSwimming() then
+		if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(75627).name, "player") and IsSwimming() then
 			if GoGo_Variables.Debug >= 10 then
 				GoGo_DebugAddLine("GoGo_UpdateMountData: In Thousand Needles with buff.  Updating water speed of ground mounts.")
 			end --if
@@ -2003,8 +2004,8 @@ function GoGo_UpdateMountData()
 		end --if
 	end --if
 	
---	if UnitBuff("player", GetSpellInfo(80610)) and IsSwimming() then
-	if AuraUtil.FindAuraByName(GetSpellInfo(80610), "player") and IsSwimming() then
+--	if UnitBuff("player", C_Spell.GetSpellInfo(80610)) and IsSwimming() then
+	if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(80610).name, "player") and IsSwimming() then
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_UpdateMountData: Swimming with Water Gliding buff.  Updating water speed of ground mounts - increasing by 50%.")
 		end --if
@@ -2022,8 +2023,8 @@ function GoGo_UpdateMountData()
 
 	if (GoGo_Variables.Player.ZoneID == 610) or (GoGo_Variables.Player.ZoneID == 614) or (GoGo_Variables.Player.ZoneID == 615) then
 		if GoGo_Variables.ExpansionAccount == 3 then  -- only exists for 4.x with Cataclysm expansion
-			if AuraUtil.FindAuraByName(GetSpellInfo(GoGo_Variables.Localize.SeaLegs), "player") then
---			if UnitBuff("player", GetSpellInfo(GoGo_Variables.Localize.SeaLegs)) then
+			if AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(GoGo_Variables.Localize.SeaLegs).name, "player") then
+--			if UnitBuff("player", C_Spell.GetSpellInfo(GoGo_Variables.Localize.SeaLegs)) then
 				GoGo_UpdateMountSpeedDB(GoGo_Variables.FilteredMounts, 404, 10001, 270)
 				GoGo_TableAddUnique(GoGo_Variables.WaterSpeed, 270)
 				GoGo_UpdateMountSpeedDB(GoGo_Variables.FilteredMounts, 404, 10004, 270)
@@ -2033,8 +2034,8 @@ function GoGo_UpdateMountData()
 		end --if
 	end --if
 
---	if (GoGo_Variables.Player.ZoneID == 978) and (UnitBuff("player", GetSpellInfo(170495))) then
-	if (GoGo_Variables.Player.ZoneID == 978) and (AuraUtil.FindAuraByName(GetSpellInfo(170495), "player")) then
+--	if (GoGo_Variables.Player.ZoneID == 978) and (UnitBuff("player", C_Spell.GetSpellInfo(170495))) then
+	if (GoGo_Variables.Player.ZoneID == 978) and (AuraUtil.FindAuraByName(C_Spell.GetSpellInfo(170495).name, "player")) then
 	-- Makes mounts instant cast if in Ashran with "Swift Riding Crop" buff
 		local GoGo_TempMountDB = {}
 		GoGo_TempMountDB = GoGo_FilterMountsIn(GoGo_Variables.FilteredMounts, 701) or {}
@@ -2289,7 +2290,7 @@ GOGO_COMMANDS = {
 		GoGo_Msg("druidflightform")
 	end, --function
 	["options"] = function()
-		InterfaceOptionsFrame_OpenToCategory(GoGo_Panel)
+		Settings.OpenToCategory(GoGo_Panel.name)
 	end, --function
 }
 
@@ -2405,7 +2406,8 @@ function GoGo_Panel_OnLoad(GoGo_Panel)
 ---------
 	GoGo_Panel.name = "GoGoMount"
 	GoGo_Panel.default = function (self) GoGo_Settings_Default("MAIN"); end;
-	InterfaceOptions_AddCategory(GoGo_Panel)
+	GoGo_category, _  = Settings.RegisterCanvasLayoutCategory(GoGo_Panel, GoGo_Panel.name)
+	Settings.RegisterAddOnCategory(GoGo_category)
 	
 end --function
 
@@ -2557,9 +2559,9 @@ function GoGo_Druid_Panel()
 	GoGo_Druid_Panel.parent = "GoGoMount"
 --	GoGo_Druid_Panel.okay = function (self) GoGo_Panel_Okay("DRUID"); end;
 	GoGo_Druid_Panel.default = function (self) GoGo_Settings_Default("DRUID"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_Druid_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category,GoGo_Druid_Panel, GoGo_Variables.Localize.String.DruidOptions)
 
-	GoGo_Druid_Panel_ClickForm = CreateFrame("CheckButton", "GoGo_Druid_Panel_ClickForm", GoGo_Druid_Panel, "InterfaceOptionsCheckButtonTemplate")
+	GoGo_Druid_Panel_ClickForm = CreateFrame("CheckButton", "GoGo_Druid_Panel_ClickForm", GoGo_Druid_Panel,"InterfaceOptionsCheckButtonTemplate")
 	GoGo_Druid_Panel_ClickForm:SetPoint("TOPLEFT", 16, -16)
 	GoGo_Druid_Panel_ClickFormText:SetText(GoGo_Variables.Localize.String.DruidSingleClick)
 	if GoGo_Prefs.DruidClickForm then
@@ -2623,7 +2625,7 @@ function GoGo_Hunter_Panel()
 	GoGo_Hunter_Panel.parent = "GoGoMount"
 --	GoGo_Hunter_Panel.okay = function (self) GoGo_Panel_Okay("HUNTER"); end;
 	GoGo_Hunter_Panel.default = function (self) GoGo_Settings_Default("HUNTER"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_Hunter_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_Hunter_Panel,GoGo_Hunter_Panel.name)
 
 	GoGo_Hunter_Panel_AspectOfPack = CreateFrame("CheckButton", "GoGo_Hunter_Panel_AspectOfPack", GoGo_Hunter_Panel, "InterfaceOptionsCheckButtonTemplate")
 	GoGo_Hunter_Panel_AspectOfPack:SetPoint("TOPLEFT", 16, -16)
@@ -2646,7 +2648,7 @@ function GoGo_Shaman_Panel()
 	GoGo_Shaman_Panel.name = GoGo_Variables.Localize.String.ShamanOptions
 	GoGo_Shaman_Panel.parent = "GoGoMount"
 	GoGo_Shaman_Panel.default = function (self) GoGo_Settings_Default("SHAMAN"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_Shaman_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_Shaman_Panel, GoGo_Shaman_Panel.name)
 
 	GoGo_Shaman_Panel_ClickForm = CreateFrame("CheckButton", "GoGo_Shaman_Panel_ClickForm", GoGo_Shaman_Panel, "InterfaceOptionsCheckButtonTemplate")
 	GoGo_Shaman_Panel_ClickForm:SetPoint("TOPLEFT", 16, -16)
@@ -2668,7 +2670,7 @@ function GoGo_NightFae_Panel()
 	GoGo_NightFae_Panel.name = GoGo_Variables.Localize.String.NightFaeOptions
 	GoGo_NightFae_Panel.parent = "GoGoMount"
 	GoGo_NightFae_Panel.default = function (self) GoGo_Settings_Default("NIGHTFAE"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_NightFae_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_NightFae_Panel,GoGo_NightFae_Panel.name)
 
 	GoGo_NightFae_Panel_ClickForm = CreateFrame("CheckButton", "GoGo_NightFae_Panel_ClickForm", GoGo_NightFae_Panel, "InterfaceOptionsCheckButtonTemplate")
 	GoGo_NightFae_Panel_ClickForm:SetPoint("TOPLEFT", 16, -16)
@@ -2690,7 +2692,7 @@ function GoGo_ZoneFavorites_Panel()
 	GoGo_ZoneFavorites_Panel.name = GoGo_Variables.Localize.String.CurrentZoneFavorites
 	GoGo_ZoneFavorites_Panel.parent = "GoGoMount"
 	GoGo_ZoneFavorites_Panel.default = function (self) GoGo_Prefs.MapIDs[GoGo_Variables.Player.MapID]["Preferred"]={}; GoGo_AddOptionCheckboxes("GoGo_ZoneFavorites_ContentFrame"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_ZoneFavorites_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_ZoneFavorites_Panel, GoGo_ZoneFavorites_Panel.name)
 	
 	GoGo_ZoneFavorites_ScrollFrame = CreateFrame("ScrollFrame", "GoGo_ZoneFavorites_ScrollFrame", GoGo_ZoneFavorites_Panel, "UIPanelScrollFrameTemplate")
 	GoGo_ZoneFavorites_ScrollFrame:SetPoint("TOPLEFT", "GoGo_ZoneFavorites_Panel", "TOPLEFT", 0, -5)
@@ -2732,7 +2734,7 @@ function GoGo_GlobalFavorites_Panel()
 	GoGo_GlobalFavorites_Panel.parent = "GoGoMount"
 	GoGo_GlobalFavorites_Panel.default = function (self) GoGo_Prefs.GlobalPrefMounts = nil; GoGo_AddOptionCheckboxes("GoGo_GlobalFavorites_ContentFrame"); end;  -- use clear command with default button
 
-	InterfaceOptions_AddCategory(GoGo_GlobalFavorites_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_GlobalFavorites_Panel, GoGo_GlobalFavorites_Panel.name)
 	
 	GoGo_GlobalFavorites_ScrollFrame = CreateFrame("ScrollFrame", "GoGo_GlobalFavorites_ScrollFrame", GoGo_GlobalFavorites_Panel, "UIPanelScrollFrameTemplate")
 	GoGo_GlobalFavorites_ScrollFrame:SetPoint("TOPLEFT", "GoGo_GlobalFavorites_Panel", "TOPLEFT", 0, -5)
@@ -2774,7 +2776,7 @@ function GoGo_ExtraPassengerMounts_Panel()
 	GoGo_ExtraPassengerMounts_Panel.name = GoGo_Variables.Localize.String.ExtraPassengerMounts
 	GoGo_ExtraPassengerMounts_Panel.parent = "GoGoMount"
 	GoGo_ExtraPassengerMounts_Panel.default = function (self) GoGo_Prefs.ExtraPassengerMounts={}; GoGo_AddOptionCheckboxes("GoGo_ExtraPassengerMounts_ContentFrame"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_ExtraPassengerMounts_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_ExtraPassengerMounts_Panel, GoGo_ExtraPassengerMounts_Panel.name)
 	
 	GoGo_ExtraPassengerMounts_ScrollFrame = CreateFrame("ScrollFrame", "GoGo_ExtraPassengerMounts_ScrollFrame", GoGo_ExtraPassengerMounts_Panel, "UIPanelScrollFrameTemplate")
 	GoGo_ExtraPassengerMounts_ScrollFrame:SetPoint("TOPLEFT", "GoGo_ExtraPassengerMounts_Panel", "TOPLEFT", 0, -5)
@@ -2815,7 +2817,7 @@ function GoGo_GlobalExclusions_Panel()
 	GoGo_GlobalExclusions_Panel.name = GoGo_Variables.Localize.String.GlobalExclusions
 	GoGo_GlobalExclusions_Panel.parent = "GoGoMount"
 	GoGo_GlobalExclusions_Panel.default = function (self) GoGo_Prefs.GlobalExclude = nil; GoGo_AddOptionCheckboxes("GoGo_GlobalExclusions_ContentFrame"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_GlobalExclusions_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_GlobalExclusions_Panel, GoGo_GlobalExclusions_Panel.name)
 	
 	GoGo_GlobalExclusions_ScrollFrame = CreateFrame("ScrollFrame", "GoGo_GlobalExclusions_ScrollFrame", GoGo_GlobalExclusions_Panel, "UIPanelScrollFrameTemplate")
 	GoGo_GlobalExclusions_ScrollFrame:SetPoint("TOPLEFT", "GoGo_GlobalExclusions_Panel", "TOPLEFT", 0, -5)
@@ -2856,7 +2858,7 @@ function GoGo_ZoneExclusions_Panel()
 	GoGo_ZoneExclusions_Panel.name = GoGo_Variables.Localize.String.CurrentZoneExclusions
 	GoGo_ZoneExclusions_Panel.parent = "GoGoMount"
 	GoGo_ZoneExclusions_Panel.default = function (self) GoGo_Prefs.MapIDs[GoGo_Variables.Player.MapID]["Excluded"]={}; GoGo_AddOptionCheckboxes("GoGo_ZoneExclusions_ContentFrame"); end;  -- use clear command with default button
-	InterfaceOptions_AddCategory(GoGo_ZoneExclusions_Panel)
+	Settings.RegisterCanvasLayoutSubcategory(GoGo_category, GoGo_ZoneExclusions_Panel, GoGo_ZoneExclusions_Panel.name)
 	
 	GoGo_ZoneExclusions_ScrollFrame = CreateFrame("ScrollFrame", "GoGo_ZoneExclusions_ScrollFrame", GoGo_ZoneExclusions_Panel, "UIPanelScrollFrameTemplate")
 	GoGo_ZoneExclusions_ScrollFrame:SetPoint("TOPLEFT", "GoGo_ZoneExclusions_Panel", "TOPLEFT", 0, -5)
@@ -2957,10 +2959,10 @@ function GoGo_Settings_Default(Class)
 		GoGo_SetPref("DruidFlightForm", false)
 		GoGo_SetPref("DruidFormNotRandomize", false)
 		GoGo_SetPref("DruidDisableInCombat", false)
-		InterfaceOptionsFrame_OpenToCategory(GoGo_Druid_Panel)
+		Settings.OpenToCategory(GoGo_Druid_Panel.name)
 	elseif Class == "HUNTER" then
 		GoGo_SetPref("AspectPack", false)
-		InterfaceOptionsFrame_OpenToCategory(GoGo_Hunter_Panel)
+		Settings.OpenToCategory(GoGo_Hunter_Panel.name)
 	elseif Class == "SHAMAN" then
 		GoGo_SetPref("ShamanClickForm", false)
 	elseif Class == "MAIN" then
@@ -2972,13 +2974,13 @@ function GoGo_Settings_Default(Class)
 		GoGo_Prefs.DisableWaterFlight = true
 		GoGo_SetPref("RemoveBuffs", true)
 		GoGo_SetPref("AutoExcludeFlyingMounts", false)
-		InterfaceOptionsFrame_OpenToCategory(GoGo_Panel_Options)
+		Settings.OpenToCategory(GoGo_Panel_Options.name)
 	else
 		GoGo_Prefs = {}
 		GoGo_Prefs.MapIDs = {}
 		GoGo_Prefs.ExtraPassengerMounts = {}
 		GoGo_Prefs.GlobalExclude = {}
-		GoGo_Prefs.version = GetAddOnMetadata("GoGoMount", "Version")
+		GoGo_Prefs.version = C_AddOns.GetAddOnMetadata("GoGoMount", "Version")
 --		GoGo_Prefs.autodismount = true
 		GoGo_SetOptionAutoDismount(1)
 		GoGo_Prefs.DisableUpdateNotice = false
@@ -3004,7 +3006,7 @@ end --function
 ---------
 function GoGo_Settings_SetUpdates()
 ---------
-	GoGo_Prefs.version = GetAddOnMetadata("GoGoMount", "Version")
+	GoGo_Prefs.version = C_AddOns.GetAddOnMetadata("GoGoMount", "Version")
 	if not GoGo_Prefs.autodismount then GoGo_Prefs.autodismount = false end
 	if not GoGo_Prefs.DisableUpdateNotice then GoGo_Prefs.DisableUpdateNotice = false end
 	if not GoGo_Prefs.DisableMountNotice then GoGo_Prefs.DisableMountNotice = false end
@@ -3210,7 +3212,7 @@ end --function
 ---------
 function GoGo_DebugCollectInformation()
 ---------
-	GoGo_DebugAddLine("Information: GoGoMount Version " .. GetAddOnMetadata("GoGoMount", "Version"))
+	GoGo_DebugAddLine("Information: GoGoMount Version " .. C_AddOns.GetAddOnMetadata("GoGoMount", "Version"))
 --	GoGo_DebugAddLine("Information: GoGoMount build version:  " ..  GetAddOnMetadata("GoGoMount", "Interface"))
 	GoGo_DebugAddLine("Information: World of Warcraft build version:  " .. select(4, _G.GetBuildInfo()))
 	if GoGo_Variables.ExpansionAccount == 0 then
