@@ -4,12 +4,12 @@ function GoGo_ZoneMapIDMigration()
 ---------
 	-- Migrating the 7.0 zoneIDs to 8.0 mapIDs
 	-- Moving from GoGoPrefs.Zones to GoGoPrefs.MapIDs
-	
+
 	local iMapID = C_Map.GetBestMapForUnit("player")
 	if not iMapID then return end
-	
+
 	local iZoneID = GoGo_Variables.ZoneMapID[iMapID] or 0
-	
+
 	if not GoGo_Prefs.MapIDs[iMapID] then
 		if GoGo_Prefs.Zones and GoGo_Prefs.Zones[iZoneID] then
 			GoGo_Prefs.MapIDs[iMapID] = GoGo_Prefs.Zones[iZoneID]
@@ -24,7 +24,7 @@ end -- function GoGo_ZoneMapIDMigration()
 
 ---------
 function GoGo_ZoneCheck()
---------- 
+---------
 	--Resetting zone flags (if true then don't use)
 	GoGo_Variables.ZoneExclude.NorthrendLoanedMounts = true
 	GoGo_Variables.ZoneExclude.TheOculus = true
@@ -38,7 +38,8 @@ function GoGo_ZoneCheck()
 	GoGo_Variables.Player.MapID = C_Map.GetBestMapForUnit("player")
     GoGo_Variables.ZoneExclude.TheMaw = true
 	GoGo_Variables.ZoneExclude.DragonRiding = false
-	
+	GoGo_Variables.ZoneExclude.DRIVE = true
+
 	if GoGo_Variables.Debug >= 10 then
 		GoGo_DebugAddLine("GoGo_ZoneCheck: Beginning function.")
 	end --if
@@ -477,6 +478,7 @@ function GoGo_ZoneCheck()
 		end --if
 		GoGo_Variables.ZoneExclude.CanFly = true
 	elseif GoGo_Variables.Player.MapID == 84 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_ZoneCheck: Setting up for Stormwind")
 		end --if
@@ -4253,6 +4255,12 @@ function GoGo_ZoneCheck()
 		end --if
 		local _, _, _, completed = GetAchievementInfo(GoGo_Variables.Localize.UnlockingTheSecret)
 		GoGo_Variables.ZoneExclude.CanFly = completed
+	elseif GoGo_Variables.Player.MapID == 1978 then -- The Waking Shores - Alliance Boat & Horde Zeppelin
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Setting up for The Waking Shores - Alliance Boat & Horde Zeppelin")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
 	elseif GoGo_Variables.Player.MapID == 2022 then -- The Waking Shores - Obsidian Bulwark
 		GoGo_Variables.ZoneExclude.DragonRiding = true
 		if GoGo_Variables.Debug >= 10 then
@@ -4300,11 +4308,120 @@ function GoGo_ZoneCheck()
 			GoGo_DebugAddLine("GoGo_ZoneCheck: Setting up for Valdraken")
 		end --if
 		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2151 then -- The Forbidden Reach
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Setting up for The Forbidden Reach")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
 	elseif GoGo_Variables.Player.MapID == 2118 then
 		if GoGo_Variables.Debug >= 10 then
 			GoGo_DebugAddLine("GoGo_ZoneCheck: The Forbidden Reach - The Old Weyrn Grounds")
 		end --if
 		GoGo_Variables.ZoneExclude.CanFly = false
+	elseif GoGo_Variables.Player.MapID == 2133 then -- Zaralek Cavern
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Setting up for Zaralek Cavern")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2151 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: The Forbidden Reach")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2133 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Zaralek Cavern")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2199 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Thaldraszus - Time Rift Event")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2200 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Emerald Dream - Ancient Bough")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2239 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Amirdrassil - Amirdrassi")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2248 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Isle of Dorn")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2339 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Dornogal")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2214 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: tHE rINGING dEEPS")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2215 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Hallowfall")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2255 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Azj-Kahet")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2274 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Azj-Kahet - Arathi's end")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true	
+	elseif GoGo_Variables.Player.MapID == 2256 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Azj-Kahet - The Maddening Deep")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2213 then
+		GoGo_Variables.ZoneExclude.DragonRiding = true
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: City of Threads")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = true
+	elseif GoGo_Variables.Player.MapID == 2369 then
+		GoGo_Variables.ZoneExclude.DragonRiding = false
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Siren Isle - Siren Isle")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = false
+	elseif GoGo_Variables.Player.MapID == 2369 then
+		GoGo_Variables.ZoneExclude.DragonRiding = false
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Siren Isle - Siren Isle")
+		end --if
+		GoGo_Variables.ZoneExclude.CanFly = false
+	elseif GoGo_Variables.Player.MapID == 2346 then
+		GoGo_Variables.ZoneExclude.CanFly = true
+		GoGo_Variables.ZoneExclude.DRIVE = false
+		if GoGo_Variables.Debug >= 10 then
+			GoGo_DebugAddLine("GoGo_ZoneCheck: Undermine - Undermine")
+		end --if
+
 --	elseif GoGo_Variables.Player.ZoneID == -1 then
 		-- Arenas:
 		-- -- Nagrand Arena
@@ -4320,7 +4437,7 @@ function GoGo_ZoneCheck()
 			GoGo_DebugCollectInformation()
 		end --if
 	end --if
-	
+
 	if IsIndoors() then	-- indoor zone exclusions go here
 		GoGo_Variables.ZoneExclude.RestrictedIndoorMounts = true -- restricting mounts to indoor mounts only unless something below says otherwise
 	else
