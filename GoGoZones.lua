@@ -4,12 +4,12 @@ function GoGo_ZoneMapIDMigration()
 ---------
 	-- Migrating the 7.0 zoneIDs to 8.0 mapIDs
 	-- Moving from GoGoPrefs.Zones to GoGoPrefs.MapIDs
-
+	
 	local iMapID = C_Map.GetBestMapForUnit("player")
 	if not iMapID then return end
-
+	
 	local iZoneID = GoGo_Variables.ZoneMapID[iMapID] or 0
-
+	
 	if not GoGo_Prefs.MapIDs[iMapID] then
 		if GoGo_Prefs.Zones and GoGo_Prefs.Zones[iZoneID] then
 			GoGo_Prefs.MapIDs[iMapID] = GoGo_Prefs.Zones[iZoneID]
@@ -24,7 +24,7 @@ end -- function GoGo_ZoneMapIDMigration()
 
 ---------
 function GoGo_ZoneCheck()
----------
+--------- 
 	--Resetting zone flags (if true then don't use)
 	GoGo_Variables.ZoneExclude.NorthrendLoanedMounts = true
 	GoGo_Variables.ZoneExclude.TheOculus = true
@@ -39,7 +39,7 @@ function GoGo_ZoneCheck()
     GoGo_Variables.ZoneExclude.TheMaw = true
 	GoGo_Variables.ZoneExclude.DragonRiding = false
 	GoGo_Variables.ZoneExclude.DRIVE = true
-
+	
 	if GoGo_Variables.Debug >= 10 then
 		GoGo_DebugAddLine("GoGo_ZoneCheck: Beginning function.")
 	end --if
@@ -4437,7 +4437,7 @@ function GoGo_ZoneCheck()
 			GoGo_DebugCollectInformation()
 		end --if
 	end --if
-
+	
 	if IsIndoors() then	-- indoor zone exclusions go here
 		GoGo_Variables.ZoneExclude.RestrictedIndoorMounts = true -- restricting mounts to indoor mounts only unless something below says otherwise
 	else
